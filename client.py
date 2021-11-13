@@ -26,7 +26,7 @@ while True:
 
     layout = [[gui.Text(serverOut.decode('utf-8'))], [gui.Button("OK")]]
 
-    window = gui.Window("Definition", layout)
+    window = gui.Window(lstring, layout)
 
     while True:
         event, values = window.read()
