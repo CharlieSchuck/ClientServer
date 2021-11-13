@@ -1,14 +1,37 @@
+import os
+from _thread import *
 import socket
+# pip install PyDictionary -- in terminal
+from PyDictionary import PyDictionary
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # (IPv4, TCP)
-s.bind((socket.gethostname(), 1234)) # host, port
+dict = PyDictionary()
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # (IPv4, TCP)
+threads = 0
 
-s.listen(5) # a queue of length 5.
-# im not putting this into a loop because we're just doing it once.
-clientsocket, address = s.accept() # if anyone tries to connect, accept -- client socket object, client's address.
-print(f"Connection from {address} has been created.")
+try:
+    s.bind((socket.gethostname(), 1234))  # host, port
+except socket.error as e:
+    print(str(e))
 
-lstring = clientsocket.recv(1024)
-clientsocket.send(bytes(((str)(lstring.upper())), "utf-8"))
+s.listen(5)  # a queue of length 5.
 
-clientsocket.close()
+
+def userClient(user):
+    user.send(str.encode('Enter a word. '))
+    while True:
+        inString = user.recv(1024)
+        outString = dict.meaning(inString.decode('utf-8'))
+        if not inString:
+            break
+        user.send(bytes((str(outString)), "utf-8"))
+    user.close()
+
+
+while True:
+    clientSocket, address = s.accept()
+    print(f"Connection from {address} has been created.")
+    start_new_thread(userClient, (clientSocket, ))
+    threads = threads + 1
+    print('Client number: ' + str(threads))
+clientSocket.close()
+s.close()
